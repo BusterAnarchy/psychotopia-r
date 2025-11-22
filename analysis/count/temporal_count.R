@@ -52,4 +52,10 @@ analysis_function <- function(data, args) {
       fill = "origin"
     )
   })
+
+  json_obj <- list(
+    labels_area = as.character(unique(data_evol_abs$date_bimestre)),
+    datasets_area = datasets_list,
+    count = nrow(data)
+  )
 }
