@@ -2,6 +2,8 @@
 
 invisible(Sys.setlocale(category = "LC_ALL", locale = "C.UTF-8"))
 
+Sys.setenv(ROOT = "/home/ubuntu/psychotopia-r")
+
 load_data <- function(){
   suppressPackageStartupMessages({
     library(DBI)
@@ -40,9 +42,9 @@ load_data <- function(){
   return(data)
 }
 
-load_filters <- function(project_root, path = "filters") {
+load_filters <- function(path = "filters") {
   
-  filter_files <- list.files(file.path(project_root, path), full.names = TRUE, pattern = "\\.R$", recursive = TRUE)
+  filter_files <- list.files(file.path(Sys.getenv("ROOT"), path), full.names = TRUE, pattern = "\\.R$", recursive = TRUE)
   filters <- list()
 
   for (file in filter_files) {
@@ -57,9 +59,9 @@ load_filters <- function(project_root, path = "filters") {
   filters
 }
 
-load_analysis <- function(project_root, path = "analysis") {
+load_analysis <- function(path = "analysis") {
 
-  files <- list.files(file.path(project_root, path), full.names = TRUE, pattern = "\\.R$", recursive = TRUE)
+  files <- list.files(file.path(Sys.getenv("ROOT"), path), full.names = TRUE, pattern = "\\.R$", recursive = TRUE)
   analysis <- list()
   
   for (file in files) {
@@ -138,10 +140,8 @@ suppressPackageStartupMessages({
 
 # --- Loading filters and analysis modules ---
 
-project_root <- "/home/ubuntu/psychotopia-r"
-
-filters <- load_filters(project_root)
-analysis <- load_analysis(project_root)
+filters <- load_filters()
+analysis <- load_analysis()
 
 # --- Create argument parser ---
 
@@ -174,17 +174,15 @@ for (f in filters) {
   }
 }
 
-# --- add analysis sub-parser ---
+# --- add analysis ---
 
-subparsers <- parser$add_subparsers(dest="analysis", help="Analyse à exécuter", required=TRUE, metavar="analysis")
+parser$add_argument("analysis", nargs="+", help="Analyses à exécuter", choices = names(analysis))
 
 for (a in analysis) {
 
-    sub_parser <- subparsers$add_parser(a$description$name, help = a$description$help)
-
     for (arg_name in names(a$description$args)) {
         arg_def <- a$description$args[[arg_name]]
-        sub_parser$add_argument(paste0("--", arg_name), help = arg_def$help)
+        parser$add_argument(paste0("--", arg_name), help = paste0(a$description$name, " : ", arg_def$help))
     }
 }
 
@@ -238,23 +236,26 @@ if (args$verbose){
 
 # --- execute analysis ---
 
-selected_analyse <- args$analysis
+results <- list()
 
-formats <- if (!is.null(args$format)) unlist(strsplit(args$format, ",")) else NULL
-output_dir <- args$output
+for (selected_analyse in args$analysis) {
 
-if (!(selected_analyse %in% names(analysis))) {
-  stop("Analyse inconnue : ", selected_analyse)
+  if (!(selected_analyse %in% names(analysis))) {
+    stop("Analyse inconnue : ", selected_analyse)
+  }
+
+  if (!is.null(args$verbose) && args$verbose) {
+    cat("🚀 Exécution de l’analyse : ", selected_analyse, "\n")
+  }
+
+  # Exécution avec tous les arguments globaux
+  res <- analysis[[selected_analyse]]$fn(data, args)
+  results[[selected_analyse]] <- res
 }
 
-if (args$verbose) {
-  cat(green$bold("🚀 Exécution de l’analyse : "), bold(selected_analyse), "\n\n")
-}
-
-res <- analysis[[selected_analyse]]$fn(data, args)
 
 # --- save the result ---
 
-save_result(res, selected_analyse, output_dir, formats, args$verbose)
+save_result(results, selected_analyse, args$output, args$format, args$verbose)
 
 

@@ -8,7 +8,7 @@ analysis_function <- function(data, args) {
 
   data = data %>% mutate(pourcentage = as.double(pourcentage))
 
-  data_dep_region = read.csv("csv/departements_region.csv")
+  data_dep_region = read.csv(file.path(Sys.getenv("ROOT"), "csv/departements_region.csv"))
 
   data <- data %>%
       mutate(departement = ifelse(nchar(departement)==1, paste0("0", departement), departement))

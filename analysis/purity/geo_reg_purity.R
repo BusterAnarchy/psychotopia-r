@@ -13,7 +13,7 @@ analysis_function <- function(data, args) {
     library(lfe)
   })
 
-  data_dep_region = read.csv("csv/departements_region.csv")
+  data_dep_region = read.csv(file.path(Sys.getenv("ROOT"), "csv/departements_region.csv"))
 
   order <- c(
     "Île-de-France", "Occitanie", "Provence-Alpes-Côte d'Azur",
