@@ -34,6 +34,8 @@ analysis_function <- function(data, args) {
 
   df_fin = df_pie %>% select(categorie_label, pourcent)
 
-  # Convertir en liste nommée
-  df_list <- setNames(as.list(df_fin$pourcent), df_fin$categorie_label)
+  list(
+    labels = as.character(df_fin$categorie_label),
+    data = df_fin$pourcent
+  )
 }
