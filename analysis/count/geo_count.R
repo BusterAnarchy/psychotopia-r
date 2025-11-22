@@ -1,6 +1,6 @@
 analysis_description <- list(
   name = "geo_count",
-  help = "Affiche le résumé statistique du dataset",
+  help = "Renvoie le nombre d'échantillions par région",
   args = list(
     mode = list(required = TRUE, help = "Abs / Prop")
   )

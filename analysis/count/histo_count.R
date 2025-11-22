@@ -1,6 +1,6 @@
 analysis_description <- list(
   name = "histo_count",
-  help = "Affiche le résumé statistique du dataset",
+  help = "Renvoie le nombre d'échantillions par molécule",
   args = list()
 )
 

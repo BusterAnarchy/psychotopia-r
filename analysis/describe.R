@@ -1,6 +1,6 @@
 analysis_description <- list(
   name = "describe",
-  help = "Affiche le résumé statistique du dataset",
+  help = "Décris les colones du jeu de donnée",
   args = list()
 )
 

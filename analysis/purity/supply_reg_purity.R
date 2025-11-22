@@ -1,6 +1,6 @@
 analysis_description <- list(
   name = "supply_reg",
-  help = "Affiche le résumé statistique du dataset",
+  help = "Calcul la régression de la pureté par rapport aux modes d'approvisionnements",
   args = list()
 )
 

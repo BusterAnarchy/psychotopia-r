@@ -1,6 +1,6 @@
 analysis_description <- list(
   name = "histo_supply",
-  help = "Affiche le résumé statistique du dataset",
+  help = "Renvoie le nombre d'échantillon par mode d'approvissionnement",
   args = list()
 )
 

@@ -190,17 +190,20 @@ for (f in filters) {
     should_run <- all(!sapply(required_args, function(n) is.null(args[[n]])))
   }
 
-  if (should_run) {
-    
-    if (args$verbose){
-      cat(green$bold("✅  Filtre appliqué : "), bold(f$description$name), "\n")
+  if (!should_run) {
+
+    if (args$verbose) {
+      cat(yellow$bold("⚠️  Filtre ignoré : "), yellow(f$description$name), "\n")
     }
 
-    data <- f$fn(data, args)
-
-  } else if (args$verbose) {
-    cat(yellow$bold("⚠️  Filtre ignoré : "), yellow(f$description$name), "\n")
+    next
   }
+    
+  if (args$verbose){
+    cat(green$bold("✅  Filtre appliqué : "), bold(f$description$name), "\n")
+  }
+
+  data <- f$fn(data, args)
 }
 
 if (args$verbose){
@@ -222,8 +225,7 @@ if (args$verbose) {
   cat(green$bold("🚀 Exécution de l’analyse : "), bold(selected_analyse), "\n\n")
 }
 
-a <- analysis[[selected_analyse]]
-res <- a$fn(data, args)
+res <- analysis[[selected_analyse]]$fn(data, args)
 
 # --- save the result ---
 

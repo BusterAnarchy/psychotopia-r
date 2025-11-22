@@ -1,6 +1,6 @@
 analysis_description <- list(
-  name = "histo",
-  help = "Affiche le résumé statistique du dataset",
+  name = "histo_purity",
+  help = "Renvoie un histograme de la pureté",
   args = list()
 )
 

@@ -1,6 +1,6 @@
 analysis_description <- list(
   name = "geo_purity",
-  help = "Affiche le résumé statistique du dataset",
+  help = "Renvoie la moyenne de la pureté par région",
   args = list()
 )
 

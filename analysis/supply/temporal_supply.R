@@ -1,6 +1,6 @@
 analysis_description <- list(
   name = "temporal_supply",
-  help = "Affiche le résumé statistique du dataset",
+  help = "Renvoie l'évolution des modes d'approvissionnement dans le temps",
   args = list()
 )
 

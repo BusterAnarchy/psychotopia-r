@@ -1,6 +1,6 @@
 analysis_description <- list(
   name = "temporal_purity",
-  help = "Affiche le résumé statistique du dataset",
+  help = "Renvoie l'évolution de la pureté dans le temps",
   args = list(
     delta = list(required = TRUE, help = "delta"),
     mode = list(required = TRUE, help = "Avg / Med")
