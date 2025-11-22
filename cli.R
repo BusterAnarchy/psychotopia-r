@@ -39,7 +39,11 @@ load_data <- function(){
 }
 
 load_filters <- function(path = "filters") {
-  filter_files <- list.files(path, full.names = TRUE, pattern = "\\.R$", recursive = TRUE)
+  
+  current_file <- dirname(sys.frame(1)$ofile %||% ".")
+  full_path <- file.path(current_file, path)
+
+  filter_files <- list.files(full_path, full.names = TRUE, pattern = "\\.R$", recursive = TRUE)
   filters <- list()
 
   for (file in filter_files) {
@@ -55,7 +59,11 @@ load_filters <- function(path = "filters") {
 }
 
 load_analysis <- function(path = "analysis") {
-  files <- list.files(path, full.names = TRUE, pattern = "\\.R$", recursive = TRUE)
+
+  current_file <- dirname(sys.frame(1)$ofile %||% ".")
+  full_path <- file.path(current_file, path)
+
+  files <- list.files(full_path, full.names = TRUE, pattern = "\\.R$", recursive = TRUE)
   analysis <- list()
   
   for (file in files) {
@@ -70,26 +78,46 @@ load_analysis <- function(path = "analysis") {
   analysis
 }
 
-save_result <- function(result, name, output_dir, formats, verbose) {
-   
+save_result <- function(result, name, output_dir = NULL, formats = c("txt"), verbose = TRUE) {
+  
   for (fmt in formats) {
+    
+    # Si output_dir n'est pas défini, on affiche dans le terminal
+    if (is.null(output_dir) || output_dir == "") {
+      if (verbose) {
+        cat(green$bold(paste0("💻 Affichage de ", name, " au format ", fmt, "\n\n")))
+      }
+      
+      # Affichage selon le format choisi
+      if (fmt == "csv" && is.data.frame(result)) {
+        print(result)  # affichage "tableau"
+      } else if (fmt == "json") {
+        cat(jsonlite::toJSON(result, pretty = TRUE, auto_unbox = TRUE), "\n")
+      } else if (fmt == "rds") {
+        cat("⚠️  Format RDS choisi : impossible d'afficher directement en console. Voici un aperçu :\n")
+        print(result)
+      } else if (fmt == "txt") {
+        print(result)
+      } else {
+        warning("Format non supporté pour l'affichage : ", fmt)
+        print(result)
+      }
+      
+      next
+    }
+    
+    # Sinon, on construit le chemin de fichier
     file_path <- file.path(output_dir, paste0(name, ".", fmt))
-
+    
     if (verbose) {
       cat(green$bold(paste0("💾 Sauvegarde de ", name, " au format ", fmt, "\n\n")))
     }
-
+    
     tryCatch({
-
-      if (fmt == "cli") {
-        print(result);
-        next
-      }
-      
       if (!dir.exists(output_dir)) {
         dir.create(output_dir, recursive = TRUE)
       }
-
+      
       if (fmt == "csv" && is.data.frame(result)) {
         write.csv(result, file_path, row.names = FALSE)
       } else if (fmt == "json") {
@@ -122,8 +150,8 @@ analysis <- load_analysis()
 parser <- ArgumentParser(description = 'Pipeline d’analyse de données')
 
 parser$add_argument("--verbose", "-v", help = "Activer le mode verbeux", action = "store_true", dest = "verbose")
-parser$add_argument("--output", "-o", help = "Dossier de sortie pour sauvegarder les résultats", default = "results")
-parser$add_argument("--format", "-f", help = "Formats de sortie séparés par des virgules (ex: csv,json,txt)", default = "cli")
+parser$add_argument("--output", "-o", help = "Dossier de sortie pour sauvegarder les résultats", default = NULL)
+parser$add_argument("--format", "-f", help = "Formats de sortie séparés par des virgules (ex: csv,json,txt)", default = "txt")
 
 # --- add filters argument parser ---
 
