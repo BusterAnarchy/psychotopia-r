@@ -6,6 +6,8 @@ analysis_description <- list(
 
 analysis_function <- function(data, args) {
   
+  scale <- args$scale
+
   suppressPackageStartupMessages({
     library(dplyr)
     library(jsonlite)
@@ -26,17 +28,37 @@ analysis_function <- function(data, args) {
     molecule_simp = unique(c(list_focus, "Autres"))
   )
 
+  if (scale == "abs") {
+
+    formula <- function(data) {
+      summarise(data, value = n(), .groups = "drop")
+    } 
+
+  } else if (scale == "prop") {
+
+    formula <- function(data) {
+      summarise(data, value = n() / first(n_total) * 100, .groups = "drop")
+    } 
+
+  } else {
+    stop("temporal_count : scale isn't abs or prop")
+  }
+
   data_evol_abs <- data_bimestre %>%
+    mutate(molecule_simp = ifelse(molecule_simp %in% list_focus, molecule_simp, "Autres")) %>%
+    group_by(date_bimestre) %>%
+    mutate(n_total = n()) %>%
+    ungroup() %>%
     mutate(molecule_simp = ifelse(molecule_simp %in% list_focus,molecule_simp,"Autres")) %>%
     group_by(date_bimestre, molecule_simp) %>%
-    summarise(abs = n(), .groups = "drop") %>%
+    formula %>%
     right_join(grille, by = c("date_bimestre", "molecule_simp")) %>%
-    mutate(abs = ifelse(is.na(abs), 0, abs)) %>%
+    mutate(value = ifelse(is.na(value), 0, value)) %>%
     arrange(date_bimestre, molecule_simp)
 
   order=data_evol_abs %>% 
     filter(date_bimestre==max(date_bimestre, na.rm=T)) %>%
-    mutate(temp=ifelse(molecule_simp=="Autres",-1,abs)) %>% 
+    mutate(temp=ifelse(molecule_simp=="Autres",-1,value)) %>% 
     arrange(desc(temp)) %>% 
     select(molecule_simp)
 
@@ -48,7 +70,7 @@ analysis_function <- function(data, args) {
   datasets_list <- lapply(prod_vec, function(prod_i) {
     list(
       label = as.character(prod_i),
-      data = (data_evol_abs %>% filter(molecule_simp == prod_i))$abs,
+      data = (data_evol_abs %>% filter(molecule_simp == prod_i))$value,
       fill = "origin"
     )
   })

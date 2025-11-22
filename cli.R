@@ -76,6 +76,20 @@ load_analysis <- function(path = "analysis") {
   analysis
 }
 
+parse_analysis <- function(a_str) {
+  parts <- strsplit(a_str, ":")[[1]]
+  name <- parts[1]
+  params <- list()
+  if (length(parts) > 1) {
+    kv_pairs <- strsplit(parts[2], ",")[[1]]
+    for (kv in kv_pairs) {
+      kv_split <- strsplit(kv, "=")[[1]]
+      params[[kv_split[1]]] <- kv_split[2]
+    }
+  }
+  list(name = name, params = params)
+}
+
 save_result <- function(result, name, output_dir = NULL, formats = c("txt"), verbose = TRUE) {
   
   for (fmt in formats) {
@@ -176,7 +190,7 @@ for (f in filters) {
 
 # --- add analysis ---
 
-parser$add_argument("analysis", nargs="+", help="Analyses à exécuter", choices = names(analysis))
+parser$add_argument("analysis", nargs="+", help="Analyses à exécuter, format: name:param1=val1,param2=val2")
 
 for (a in analysis) {
 
@@ -236,9 +250,14 @@ if (args$verbose){
 
 # --- execute analysis ---
 
+parsed_analyses <- lapply(args$analysis, parse_analysis)
 results <- list()
+counters <- list() 
 
-for (selected_analyse in args$analysis) {
+for (a in parsed_analyses) {
+
+  selected_analyse <- a$name
+  params <- a$params
 
   if (!(selected_analyse %in% names(analysis))) {
     stop("Analyse inconnue : ", selected_analyse)
@@ -248,9 +267,16 @@ for (selected_analyse in args$analysis) {
     cat("🚀 Exécution de l’analyse : ", selected_analyse, "\n")
   }
 
-  # Exécution avec tous les arguments globaux
-  res <- analysis[[selected_analyse]]$fn(data, args)
-  results[[selected_analyse]] <- res
+  res <- analysis[[selected_analyse]]$fn(data, c(list(data = data), params))
+
+  if (!is.null(params$label)) {
+    result_name <- params$label
+  } else {
+
+    result_name <- selected_analyse
+  }
+
+  results[[result_name]] <- res
 }
 
 
