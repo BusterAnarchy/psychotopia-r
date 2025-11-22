@@ -23,5 +23,9 @@ analysis_function <- function(data, args) {
   mutate(occurence = ifelse(is.na(occurence), 0, occurence)) %>% 
   arrange(classe)
   
-  data_histo
+  json_obj <- list(
+    labels = as.character(data_histo$classe),
+    data = data_histo$occurence,
+    count = nrow(data)
+  )
 }

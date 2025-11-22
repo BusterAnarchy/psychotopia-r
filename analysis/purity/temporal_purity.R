@@ -67,5 +67,10 @@ analysis_function <- function(data, args) {
       )
     )
     labels_line = as.character(data_lis$date)
-    list(labels_line,datasets_list)
+    
+    json_obj <- list(
+      labels_line = labels_line,
+      datasets_line = datasets_list,
+      count = nrow(data)
+    )
 }
