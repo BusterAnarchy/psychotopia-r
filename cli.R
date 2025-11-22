@@ -1,12 +1,14 @@
 #!/usr/bin/env Rscript
 
+invisible(Sys.setlocale(category = "LC_ALL", locale = "C.UTF-8"))
+
 load_data <- function(){
   suppressPackageStartupMessages({
     library(DBI)
     library(RMariaDB)
     library(dplyr)
   })
-  
+
   user <- Sys.getenv("USER")
   pwd <- Sys.getenv("PASSWORD")
   host <- Sys.getenv("HOST")
@@ -38,12 +40,9 @@ load_data <- function(){
   return(data)
 }
 
-load_filters <- function(path = "filters") {
+load_filters <- function(project_root, path = "filters") {
   
-  current_file <- dirname(sys.frame(1)$ofile %||% ".")
-  full_path <- file.path(current_file, path)
-
-  filter_files <- list.files(full_path, full.names = TRUE, pattern = "\\.R$", recursive = TRUE)
+  filter_files <- list.files(file.path(project_root, path), full.names = TRUE, pattern = "\\.R$", recursive = TRUE)
   filters <- list()
 
   for (file in filter_files) {
@@ -58,12 +57,9 @@ load_filters <- function(path = "filters") {
   filters
 }
 
-load_analysis <- function(path = "analysis") {
+load_analysis <- function(project_root, path = "analysis") {
 
-  current_file <- dirname(sys.frame(1)$ofile %||% ".")
-  full_path <- file.path(current_file, path)
-
-  files <- list.files(full_path, full.names = TRUE, pattern = "\\.R$", recursive = TRUE)
+  files <- list.files(file.path(project_root, path), full.names = TRUE, pattern = "\\.R$", recursive = TRUE)
   analysis <- list()
   
   for (file in files) {
@@ -142,8 +138,10 @@ suppressPackageStartupMessages({
 
 # --- Loading filters and analysis modules ---
 
-filters <- load_filters()
-analysis <- load_analysis()
+project_root <- "/home/ubuntu/psychotopia-r"
+
+filters <- load_filters(project_root)
+analysis <- load_analysis(project_root)
 
 # --- Create argument parser ---
 
