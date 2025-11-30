@@ -24,4 +24,12 @@ analysis_function <- function(data, args) {
 
   # Convertir en liste nommée
   df_list <- setNames(as.list(df_fin$pourcent), df_fin$categorie_label)
+
+  N=nrow(df_without_blacklist)
+
+  json_obj <- list(
+    labels = as.character(df_fin$categorie_label),
+    data = df_fin$pourcent,
+    count=N
+  )
 }

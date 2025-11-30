@@ -59,4 +59,12 @@ analysis_function <- function(data, args) {
       fill = "origin"
     )
   })
+
+  N=nrow(df_without_blacklist)
+
+  json_obj <- list(
+    labels_area = as.character(unique(data_evol_approvisionnement$date_bimestre)),
+    datasets_area = datasets_list,
+    count=N
+  )
 }
