@@ -7,14 +7,24 @@ analysis_description <- list(
 analysis_function <- function(data, args) {
   
   scale <- args$scale
+  lim <- 15 #nombre de produits différents sur le diagramme
 
   suppressPackageStartupMessages({
     library(dplyr)
     library(jsonlite)
     library(lubridate)
-  })
+  })   
   
-  list_focus <- data$molecule_simp
+
+  data_pre_analysis <- data %>%
+    select(molecule_simp) %>%
+    mutate(molecule_simp  = ifelse(molecule_simp == "Problème", "Autres",molecule_simp)) %>%
+    group_by(molecule_simp) %>%
+    summarise(somme = n())%>%
+    arrange(desc(somme)) %>% 
+    mutate(molecule_simp = ifelse(row_number()>lim, "Autres",molecule_simp))
+  
+  list_focus <- data_pre_analysis$molecule_simp
 
   data_bimestre <- data %>%
     mutate(

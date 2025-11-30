@@ -6,7 +6,7 @@ analysis_description <- list(
 
 analysis_function <- function(data, args) {
 
-  data = data %>% mutate(pourcentage = as.double(pourcentage))
+  data = data  %>% filter(provenance != "Deep web / dark web") %>% mutate(pourcentage = as.double(pourcentage))
 
   data_dep_region = read.csv(file.path(Sys.getenv("ROOT"), "csv/departements_region.csv"))
 
