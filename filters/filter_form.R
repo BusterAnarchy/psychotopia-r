@@ -7,6 +7,6 @@ filter_description <- list(
 )
 
 filter_function <- function(data, args) {
-    form <- args$form
-    data %>% filter(forme==form)
+  form <- strsplit(args$form, ",")[[1]]
+  data %>% filter(forme %in% form)
 }
