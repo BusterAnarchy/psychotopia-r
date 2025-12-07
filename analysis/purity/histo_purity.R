@@ -1,22 +1,35 @@
 analysis_description <- list(
   name = "histo_purity",
   help = "Renvoie un histograme de la pureté",
-  args = list()
+  args = list(
+    unit = list(required = TRUE, help = "unit")
+  )
 )
 
 analysis_function <- function(data, args) {
+  unit = args$unit
+  if (unit == "poids"){
+    mini = 0
+    maxi = max(data$pourcentage)
+    step = 20
+  }
+  if (unit == "pourcent"){
+    mini = 0
+    maxi = 100
+    step = 5
+  }
 
   data = data %>% mutate(pourcentage = as.double(pourcentage))
 
-  tranches <- tibble(classe = seq(0, 100, by = 5))
+  tranches <- tibble(classe = seq(mini, maxi, by = step))
 
   data_histo <- data %>%
   select(pourcentage) %>% 
   mutate(classe = cut(pourcentage,
-                      breaks = seq(0, 105, by = 5),
+                      breaks =seq(mini, maxi+step, by = step),
                       include.lowest = TRUE,
                       right = FALSE,  # [x, y[
-                      labels = seq(0, 100, by = 5))) %>%
+                      labels = seq(mini, maxi, by = step)))%>%
   count(classe, name = "occurence") %>%
   mutate(classe = as.integer(as.character(classe))) %>% 
   right_join(tranches, by = "classe") %>%
