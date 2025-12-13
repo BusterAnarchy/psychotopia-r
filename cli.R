@@ -192,14 +192,6 @@ for (f in filters) {
 
 parser$add_argument("analysis", nargs="+", help="Analyses à exécuter, format: name:param1=val1,param2=val2")
 
-for (a in analysis) {
-
-    for (arg_name in names(a$description$args)) {
-        arg_def <- a$description$args[[arg_name]]
-        parser$add_argument(paste0("--", arg_name), help = paste0(a$description$name, " : ", arg_def$help))
-    }
-}
-
 args <- parser$parse_args()
 args <- as.list(args)
 

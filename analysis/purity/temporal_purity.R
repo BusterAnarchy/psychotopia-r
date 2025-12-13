@@ -3,7 +3,8 @@ analysis_description <- list(
   help = "Renvoie l'évolution de la pureté dans le temps",
   args = list(
     delta = list(required = TRUE, help = "delta"),
-    mode = list(required = TRUE, help = "Avg / Med")
+    mode = list(required = TRUE, help = "Avg / Med"),
+    unit = list(required = TRUE, help = "pourcent / poids")
   )
 )
 
@@ -11,6 +12,7 @@ analysis_function <- function(data, args) {
 
     delta <- as.double(args$delta)
     mode <- args$mode
+    unit <- args$unit
 
     data = data %>% mutate(pourcentage = as.double(pourcentage))
 
@@ -28,7 +30,9 @@ analysis_function <- function(data, args) {
           borne_inf = main - ecart_type_glissant) %>%
         filter(date >= min(date) + delta, date <= max(date) - delta) %>%
         select(date, main, borne_sup, borne_inf)
-      data_lis <- data_lis %>% mutate(borne_inf = ifelse(borne_inf < 0, 0, borne_inf), borne_sup = ifelse(borne_sup > 100, 100, borne_sup))
+      if (unit == "pourcent"){
+        data_lis <- data_lis %>% mutate(borne_inf = ifelse(borne_inf < 0, 0, borne_inf), borne_sup = ifelse(borne_sup > 100, 100, borne_sup))
+      }
     }
     
     if (mode == "med"){

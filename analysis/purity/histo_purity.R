@@ -2,7 +2,7 @@ analysis_description <- list(
   name = "histo_purity",
   help = "Renvoie un histograme de la pureté",
   args = list(
-    unit = list(required = TRUE, help = "unit")
+    unit = list(required = TRUE, help = "pourcent / poids")
   )
 )
 
