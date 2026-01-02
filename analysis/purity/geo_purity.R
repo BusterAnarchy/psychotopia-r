@@ -17,6 +17,7 @@ analysis_function <- function(data, args) {
   data_dep_region = read.csv(file.path(Sys.getenv("ROOT"), "csv/departements_region.csv"))
 
   data <- data %>%
+      mutate(departement = as.character(departement)) %>%
       mutate(departement = ifelse(nchar(departement)==1, paste0("0", departement), departement))
 
   data_sum_reg <- left_join(

@@ -31,6 +31,7 @@ analysis_function <- function(data, args) {
   data <- data %>%
       filter(supply != "Deep web / dark web") %>%
       mutate(
+        departement = as.character(.data$departement),
         departement = ifelse(
           nchar(.data$departement) == 1,
           paste0("0", .data$departement),

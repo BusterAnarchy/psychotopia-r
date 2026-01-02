@@ -22,8 +22,9 @@ analysis_function <- function(data, args) {
   }
 
   data <- data %>%
-    mutate(molecule_label = .data[[molecule_col]]) %>%
-    mutate(molecule_label = ifelse(molecule_label %in% c("Problème", "probleme"), "Autres", molecule_label))
+    mutate(molecule_label = as.character(.data[[molecule_col]])) %>%
+    mutate(molecule_label = ifelse(molecule_label %in% c("Problème", "probleme"), "Autres", molecule_label)) %>%
+    mutate(molecule_label = as.character(molecule_label))
 
   data_pre_analysis <- data %>%
     select(molecule_label) %>%
@@ -32,7 +33,7 @@ analysis_function <- function(data, args) {
     arrange(desc(somme)) %>% 
     mutate(molecule_label = ifelse(row_number()>lim, "Autres", molecule_label))
   
-  list_focus <- data_pre_analysis$molecule_label
+  list_focus <- as.character(data_pre_analysis$molecule_label)
 
   data_bimestre <- data %>%
     mutate(
@@ -43,7 +44,7 @@ analysis_function <- function(data, args) {
 
   grille <- expand.grid(
     date_bimestre = unique(data_bimestre$date_bimestre),
-    molecule_label = unique(c(list_focus, "Autres"))
+    molecule_label = unique(as.character(c(list_focus, "Autres")))
   )
 
   if (scale == "abs") {
@@ -68,14 +69,20 @@ analysis_function <- function(data, args) {
     mutate(n_total = n()) %>%
     ungroup() %>%
     mutate(molecule_label = ifelse(molecule_label %in% list_focus, molecule_label, "Autres")) %>%
+    mutate(molecule_label = as.character(molecule_label)) %>%
     group_by(date_bimestre, molecule_label) %>%
     formula %>%
     right_join(grille, by = c("date_bimestre", "molecule_label")) %>%
     mutate(value = ifelse(is.na(value), 0, value)) %>%
     arrange(date_bimestre, molecule_label)
 
+  max_date <- suppressWarnings(max(data_evol_abs$date_bimestre, na.rm = TRUE))
+  if (!is.finite(max_date)) {
+    return(list(labels_area = character(0), datasets_area = list(), count = nrow(data)))
+  }
+
   order=data_evol_abs %>% 
-    filter(date_bimestre==max(date_bimestre, na.rm=T)) %>%
+    filter(date_bimestre==max_date) %>%
     mutate(temp=ifelse(molecule_label=="Autres",-1,value)) %>% 
     arrange(desc(temp)) %>% 
     select(molecule_label)

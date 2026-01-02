@@ -28,6 +28,11 @@ load_data <- function(){
   tables <- dbListTables(con)
   data <- dbReadTable(con, "psychotopia_analysis")
 
+  if ("psychotopia_family_molecule" %in% tables) {
+    family <- dbReadTable(con, "psychotopia_family_molecule")
+    data <-  data %>% left_join(family, by = "molecule")
+  }
+
   if ("psychotopia_analysis_cut_agents" %in% tables) {
     cut_agents <- dbReadTable(con, "psychotopia_analysis_cut_agents")
     data <- data %>% left_join(cut_agents, by = "id")
@@ -43,7 +48,11 @@ load_data <- function(){
     data <- data %>% left_join(tablet_mass, by = "id")
   }
   dbDisconnect(con)
-  data = data %>% mutate(date=as.Date(date))
+
+  data = data %>% mutate(
+    date = as.Date(date),
+    departement = as.character(departement)
+  )
   
   return(data)
 }
@@ -281,4 +290,3 @@ for (a in parsed_analyses) {
 # --- save the result ---
 
 save_result(results, selected_analyse, args$output, args$format, args$verbose)
-

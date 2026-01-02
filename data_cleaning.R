@@ -39,6 +39,12 @@ ra[] <- lapply(ra, function(col) {
 })
 
 # ----------------------------
+# Suppression d'une entrée invalide
+# ----------------------------
+ra <- ra %>%
+  filter(identification != "PSYCHOACTIF2023007")
+
+# ----------------------------
 # Normalisation molecule
 # ----------------------------
 ra <- ra %>%
@@ -146,31 +152,58 @@ sub_products_data <- ra %>%
     morphine = morphine
   )
 
+extract_number_combined <- function(comment, molecule) {
+  comment_clean <- gsub("\\s+", "", comment)
+  comment_clean <- gsub("-", "", comment_clean)
+  comment_clean <- tolower(comment_clean)
+
+  molecule_clean <- tolower(gsub("-", "", molecule))
+  
+  patterns <- c(
+    paste0(".*?(\\d+[\\.,]?\\d*)mgde", molecule_clean, ".*"),
+    paste0(".*?(\\d+[\\.,]?\\d*)mg", molecule_clean, "/.*"),
+    ".*?(\\d+[\\.,]?\\d*)mgeqbase.*"
+  )
+  
+  for (pattern in patterns) {
+    match <- sub(pattern, "\\1", comment_clean)
+    match <- gsub(",", ".", match)
+    if (!is.na(suppressWarnings(as.numeric(match)))) {
+      return(as.numeric(match))
+    }
+  }
+  
+  NA_real_
+}
+
 tablet_mass_data <- ra %>%
   filter(forme_final == "comprime") %>%
   mutate(
+    tablet_content = vapply(
+      coupe,
+      extract_number_combined,
+      numeric(1),
+      molecule = molecule
+    ),
+
     coupe_clean = ifelse(is.na(coupe), "", coupe),
     coupe_clean = gsub("mg", "", coupe_clean),
     coupe_clean = gsub(",", ".", coupe_clean),
-    tablet_mass = sapply(
+
+    tablet_mass = vapply(
       str_extract_all(coupe_clean, "\\b[0-9]+(?:\\.[0-9]+)?\\b"),
-      function(x) {
-        if (length(x) == 0) return(NA)
-        max(as.numeric(x), na.rm = TRUE)
-      }
+      function(x) if (length(x) == 0) NA_real_ else max(as.numeric(x)),
+      numeric(1)
     ),
-    tablet_mass = ifelse(tablet_mass > pourcentage / 0.8, tablet_mass, NA),
-    tablet_content = ifelse(
-      !is.na(tablet_mass) & !is.na(pourcentage),
-      tablet_mass * (pourcentage / 100),
-      NA
-    )
+
+    tablet_mass = ifelse(tablet_mass > tablet_content / 0.8, tablet_mass, NA_real_)
   ) %>%
   transmute(
     id = identification,
-    tablet_mass = tablet_mass,
-    tablet_content = tablet_content
+    tablet_content,
+    tablet_mass
   )
+
 
 # ----------------------------
 # Écriture en base
