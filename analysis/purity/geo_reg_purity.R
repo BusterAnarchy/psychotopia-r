@@ -6,7 +6,13 @@ analysis_description <- list(
 
 analysis_function <- function(data, args) {
 
-  data = data %>% mutate(pourcentage = as.double(pourcentage))
+  percent_col <- if ("percent" %in% names(data)) {
+    "percent"
+  } else {
+    stop("geo_reg_purity : colonne 'percent' absente du jeu de données.")
+  }
+
+  data = data %>% mutate(percent_val = as.double(.data[[percent_col]]))
   
   suppressPackageStartupMessages({
     library(lubridate)
@@ -23,7 +29,7 @@ analysis_function <- function(data, args) {
   )
 
   data <- data %>%
-      filter(provenance != "Deep web / dark web") %>%
+      filter(supply != "Deep web / dark web") %>%
       mutate(
         departement = ifelse(
           nchar(.data$departement) == 1,
@@ -42,7 +48,7 @@ analysis_function <- function(data, args) {
       mutate(
         nom_region = factor(.data$nom_region, levels = unlist(order))
       )
-  model <- felm(pourcentage ~ nom_region | bimestre + provenance, data = data)
+  model <- felm(percent_val ~ nom_region | bimestre + supply, data = data)
 
   summar <- summary(model)
   r_squared <- summar$r.squared

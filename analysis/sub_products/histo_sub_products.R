@@ -14,7 +14,7 @@ analysis_function <- function(data, args) {
 
     liste_prod_coupe = c("X6MAM","noscapine","papaverine","morphine")
 
-    data_coupe = data %>% filter(presencecoupe==1) %>%  select(all_of(liste_prod_coupe),date)
+    data_coupe = data %>% filter(is_cutted==1) %>%  select(all_of(liste_prod_coupe),date)
 
     data_coupe<- data_coupe %>%
         rename("6-MAM" = X6MAM, 
@@ -30,9 +30,9 @@ analysis_function <- function(data, args) {
     for (col in names(data_coupe)) {
         vec <- data_coupe[[col]]
         if (is.numeric(vec)) {
-            pourcentage <- mean(vec != 0, na.rm = TRUE) * 100
+            percent <- mean(vec != 0, na.rm = TRUE) * 100
             pourcentage_non_nuls <- rbind(pourcentage_non_nuls,
-                data.frame(prod = col, pourcentage_non_nul = round(pourcentage, 2)))
+                data.frame(prod = col, pourcentage_non_nul = round(percent, 2)))
         }
     }
 

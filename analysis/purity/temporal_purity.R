@@ -14,17 +14,23 @@ analysis_function <- function(data, args) {
     mode <- args$mode
     unit <- args$unit
 
-    data = data %>% mutate(pourcentage = as.double(pourcentage))
+    percent_col <- if ("percent" %in% names(data)) {
+      "percent"
+    } else {
+      stop("temporal_purity : colonne 'percent' absente du jeu de données.")
+    }
+
+    data <- data %>% mutate(percent_val = as.double(.data[[percent_col]]))
 
     if (mode == "avg"){
       data_lis <- data %>%
         arrange(date) %>%
         mutate(
           main = sapply(date, function(d) {
-            mean(pourcentage[date >= d - delta & date <= d + delta], na.rm = TRUE)
+            mean(percent_val[date >= d - delta & date <= d + delta], na.rm = TRUE)
           }),
           ecart_type_glissant = sapply(date, function(d) {
-            sd(pourcentage[date >= d - delta & date <= d + delta], na.rm = TRUE)
+            sd(percent_val[date >= d - delta & date <= d + delta], na.rm = TRUE)
           }),
           borne_sup = main + ecart_type_glissant,
           borne_inf = main - ecart_type_glissant) %>%
@@ -40,13 +46,13 @@ analysis_function <- function(data, args) {
         arrange(date) %>%
         mutate(
           main = sapply(date, function(d) {
-            median(pourcentage[date >= d - delta & date <= d + delta], na.rm = TRUE)
+            median(percent_val[date >= d - delta & date <= d + delta], na.rm = TRUE)
           }),
           borne_inf = sapply(date, function(d) {
-            quantile(pourcentage[date >= d - delta & date <= d + delta], 0.25, na.rm = TRUE)
+            quantile(percent_val[date >= d - delta & date <= d + delta], 0.25, na.rm = TRUE)
         }),
           borne_sup = sapply(date, function(d) {
-            quantile(pourcentage[date >= d - delta & date <= d + delta], 0.75, na.rm = TRUE)
+            quantile(percent_val[date >= d - delta & date <= d + delta], 0.75, na.rm = TRUE)
         })) %>%
         filter(date >= min(date) + delta, date <= max(date) - delta) %>%
         select(date, main, borne_sup, borne_inf)

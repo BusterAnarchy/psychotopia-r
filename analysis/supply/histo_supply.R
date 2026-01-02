@@ -7,14 +7,14 @@ analysis_description <- list(
 analysis_function <- function(data, args) {
   
   black_list=c("Produits de coupe et commentaires :","Revendeur habituel","Revendeur occasionnel","Nous ne détectons rien par HPLC / CCM","")
-  df_without_blacklist <- data %>% filter(!provenance %in% black_list)
+  df_without_blacklist <- data %>% filter(!supply %in% black_list)
 
   df_pie <- df_without_blacklist %>% 
-    group_by(provenance) %>%
+    group_by(supply) %>%
     summarise(somme = n()) %>%
     mutate(
       pourcent = somme / sum(somme) * 100,
-      categorie_label = paste0(provenance, " (", round(pourcent, 1), "%)")
+      categorie_label = paste0(supply, " (", round(pourcent, 1), "%)")
     ) %>%
     arrange(somme) %>%
     mutate(categorie_label = factor(categorie_label, levels = categorie_label))

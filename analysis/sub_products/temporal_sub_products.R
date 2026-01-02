@@ -14,7 +14,7 @@ analysis_function <- function(data, args) {
 
     liste_prod_coupe = c("X6MAM","noscapine","papaverine","morphine")
 
-    data_coupe = data %>% filter(presencecoupe==1) %>%  select(all_of(liste_prod_coupe),date)
+    data_coupe = data %>% filter(is_cutted==1) %>%  select(all_of(liste_prod_coupe),date)
 
     data_coupe<- data_coupe %>%
         rename("6-MAM" = X6MAM, 

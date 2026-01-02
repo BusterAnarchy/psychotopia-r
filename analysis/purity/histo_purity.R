@@ -8,9 +8,17 @@ analysis_description <- list(
 
 analysis_function <- function(data, args) {
   unit = args$unit
+  percent_col <- if ("percent" %in% names(data)) {
+    "percent"
+  } else {
+    stop("histo_purity : colonne 'percent' absente du jeu de données.")
+  }
+
+  data <- data %>% mutate(percent_val = as.double(.data[[percent_col]]))
+
   if (unit == "poids"){
     mini = 0
-    maxi = max(data$pourcentage)
+    maxi = max(data$percent_val, na.rm = TRUE)
     step = 20
   }
   if (unit == "pourcent"){
@@ -19,13 +27,11 @@ analysis_function <- function(data, args) {
     step = 5
   }
 
-  data = data %>% mutate(pourcentage = as.double(pourcentage))
-
   tranches <- tibble(classe = seq(mini, maxi, by = step))
 
   data_histo <- data %>%
-  select(pourcentage) %>% 
-  mutate(classe = cut(pourcentage,
+  select(percent_val) %>% 
+  mutate(classe = cut(percent_val,
                       breaks =seq(mini, maxi+step, by = step),
                       include.lowest = TRUE,
                       right = FALSE,  # [x, y[

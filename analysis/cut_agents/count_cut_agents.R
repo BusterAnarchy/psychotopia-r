@@ -12,16 +12,16 @@ analysis_function <- function(data, args) {
         library(lubridate)
     })
 
-    data_presence_coupe = data %>% select(presencecoupe) %>%
-        filter(presencecoupe==0 | presencecoupe==1) %>% 
-        mutate(presencecoupe = ifelse(presencecoupe==1, "Produit(s) de coupe détecté(s)","Pas de produit de coupe détecté"))
+    data_presence_coupe = data %>% select(is_cutted) %>%
+        filter(is_cutted==0 | is_cutted==1) %>% 
+        mutate(is_cutted = ifelse(is_cutted==1, "Produit(s) de coupe détecté(s)","Pas de produit de coupe détecté"))
 
     df_pie_presence_coupe <- data_presence_coupe %>% 
-        group_by(presencecoupe) %>%
+        group_by(is_cutted) %>%
         summarise(somme = n()) %>%
         mutate(
             pourcent = somme / sum(somme) * 100,
-            categorie_label = paste0(presencecoupe, " (", round(pourcent, 1), "%)")
+            categorie_label = paste0(is_cutted, " (", round(pourcent, 1), "%)")
         ) %>%
         arrange(desc(categorie_label)) %>%
         mutate(categorie_label = factor(categorie_label, levels = categorie_label))

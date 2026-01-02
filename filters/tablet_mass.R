@@ -8,6 +8,16 @@ filter_description <- list(
 
 filter_function <- function(data, args) {
   library(stringr)  
+  if (!("coupe" %in% names(data))) {
+    stop("Tablet mass : colonne 'coupe' absente du jeu de données.")
+  }
+
+  percent_col <- if ("percent" %in% names(data)) {
+    "percent"
+  } else {
+    stop("Tablet mass : colonne 'percent' absente du jeu de données.")
+  }
+
   data <- data %>%
     mutate(
       # on enlève la notation mg
@@ -24,5 +34,6 @@ filter_function <- function(data, args) {
       )
     )
 
-  data = data %>% mutate(tablet_mass = ifelse(tablet_mass > pourcentage/0.8, tablet_mass, NA)) #permet d'éliminer les erreurs où le poids le plus grand est la masse de MDMA (eq base ou eq HCL)
+  data$tablet_mass <- ifelse(data$tablet_mass > data[[percent_col]] / 0.8, data$tablet_mass, NA) #permet d'éliminer les erreurs où le poids le plus grand est la masse de MDMA (eq base ou eq HCL)
+  data
 }

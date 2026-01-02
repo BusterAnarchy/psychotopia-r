@@ -6,18 +6,24 @@ analysis_description <- list(
 
 analysis_function <- function(data, args) {
 
-  data = data %>% mutate(pourcentage = as.double(pourcentage))
+  percent_col <- if ("percent" %in% names(data)) {
+    "percent"
+  } else {
+    stop("supply_reg_purity : colonne 'percent' absente du jeu de données.")
+  }
+
+  data = data %>% mutate(percent_val = as.double(.data[[percent_col]]))
 
   black_list=c("Produits de coupe et commentaires :","Revendeur habituel","Revendeur occasionnel","Nous ne détectons rien par HPLC / CCM","")
 
   data <- data %>%
-    filter(!provenance %in% black_list)
+    filter(!supply %in% black_list)
 
   order = c("Deep web / dark web", "Dealer de rue (four)", "Livreur", "Réseaux sociaux en ligne", "Dealer en soirée", "Don entre partenaire de conso", "Boutique en ligne")
   data_reg=data %>%
-    mutate(provenance = factor(provenance, levels = unlist(order)))
+    mutate(supply = factor(supply, levels = unlist(order)))
 
-  model = lm(pourcentage ~ provenance, data=data_reg)
+  model = lm(percent_val ~ supply, data=data_reg)
  
   summar <- summary(model)
   r_squared <- summar$r.squared
@@ -44,7 +50,7 @@ analysis_function <- function(data, args) {
   # Génération de la liste des datasets
   datasets_list <- lapply(var_names, function(var_names_i) {
     list(
-      "label" = ifelse(var_names_i == "(Intercept)", "Deep web / dark web", sub("provenance", "", var_names_i)),
+      "label" = ifelse(var_names_i == "(Intercept)", "Deep web / dark web", sub("supply", "", var_names_i)),
       "mean" = unname(round(mean[var_names_i],3)),
       "coefficient" = paste(unname(round(coefs[var_names_i],3)), unname(stars[var_names_i]),sep=""),
       "standard_error" = unname(round(std_errors[var_names_i],3))

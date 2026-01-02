@@ -14,7 +14,7 @@ analysis_function <- function(data, args) {
 
     liste_prod_coupe = c("paracetamol","cafeine","levamisole","phenacetine","hydroxyzine", "lidocaine","procaine")
 
-    data_coupe = data %>% filter(presencecoupe==1) %>%  select(all_of(liste_prod_coupe),date)
+    data_coupe = data %>% filter(is_cutted==1) %>%  select(all_of(liste_prod_coupe),date)
 
     data_coupe<- data_coupe %>%
     rename("Paracétamol" = paracetamol, 

@@ -7,13 +7,13 @@ analysis_description <- list(
 analysis_function <- function(data, args) {
     
     data_conso = data %>%
-        filter(consomme==0 | consomme==1) %>% 
-        mutate(consomme = ifelse(consomme==1, "Déjà consommé","Pas encore consommé")) %>%
-        group_by(consomme) %>%
+        filter(consumed==0 | consumed==1) %>% 
+        mutate(consumed = ifelse(consumed==1, "Déjà consommé","Pas encore consommé")) %>%
+        group_by(consumed) %>%
         summarise(somme = n()) %>%
         mutate(
             pourcent = somme / sum(somme) * 100,
-            categorie_label = paste0(consomme, " (", round(pourcent, 1), "%)")
+            categorie_label = paste0(consumed, " (", round(pourcent, 1), "%)")
         ) %>%
         arrange(desc(categorie_label)) %>%
         mutate(categorie_label = factor(categorie_label, levels = categorie_label))

@@ -79,8 +79,8 @@ analysis_function <- function(data, args) {
     }
   }
 
-  if ("forme" %in% names(data)) {
-    forms <- data$forme
+  if ("form" %in% names(data)) {
+    forms <- data$form
     forms <- forms[!is.na(forms)]
     if (length(forms)) {
       forms <- trimws(as.character(forms))
@@ -103,8 +103,8 @@ analysis_function <- function(data, args) {
     }
   }
 
-  if ("pourcentage" %in% names(data)) {
-    pur <- suppressWarnings(as.numeric(data$pourcentage))
+  if ("percent" %in% names(data)) {
+    pur <- suppressWarnings(as.numeric(data$percent))
     pur <- pur[!is.na(pur)]
     if (length(pur)) {
       result$purity <- list(
@@ -116,8 +116,8 @@ analysis_function <- function(data, args) {
     }
   }
 
-  if ("presencecoupe" %in% names(data)) {
-    coupe <- data$presencecoupe
+  if ("is_cutted" %in% names(data)) {
+    coupe <- data$is_cutted
     coupe <- coupe[!is.na(coupe)]
     if (length(coupe)) {
       coupe_numeric <- as.numeric(coupe)
