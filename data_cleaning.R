@@ -147,6 +147,7 @@ sub_products_data <- ra %>%
   )
 
 tablet_mass_data <- ra %>%
+  filter(forme_final == "comprime") %>%
   mutate(
     coupe_clean = ifelse(is.na(coupe), "", coupe),
     coupe_clean = gsub("mg", "", coupe_clean),
@@ -158,11 +159,17 @@ tablet_mass_data <- ra %>%
         max(as.numeric(x), na.rm = TRUE)
       }
     ),
-    tablet_mass = ifelse(tablet_mass > pourcentage / 0.8, tablet_mass, NA)
+    tablet_mass = ifelse(tablet_mass > pourcentage / 0.8, tablet_mass, NA),
+    tablet_content = ifelse(
+      !is.na(tablet_mass) & !is.na(pourcentage),
+      tablet_mass * (pourcentage / 100),
+      NA
+    )
   ) %>%
   transmute(
     id = identification,
-    tablet_mass = tablet_mass
+    tablet_mass = tablet_mass,
+    tablet_content = tablet_content
   )
 
 # ----------------------------

@@ -5,16 +5,16 @@ analysis_description <- list(
 )
 
 analysis_function <- function(data, args) {
-  percent_col <- if ("percent" %in% names(data)) {
-    "percent"
+  content_col <- if ("tablet_content" %in% names(data)) {
+    "tablet_content"
   } else {
-    stop("mass_reg_purity : colonne 'percent' absente du jeu de données.")
+    stop("mass_reg_purity : colonne 'tablet_content' absente du jeu de données.")
   }
 
-  data <- data %>% mutate(percent_val = as.double(.data[[percent_col]]))
+  data <- data %>% mutate(content_val = as.double(.data[[content_col]]))
   data <- data %>% filter(!is.na(tablet_mass))
 
-  model <- lm(percent_val ~ tablet_mass, data)
+  model <- lm(content_val ~ tablet_mass, data)
   summar <- summary(model)
   coef <- summar$coefficients  
   poids_lis=list()
@@ -27,7 +27,7 @@ analysis_function <- function(data, args) {
   
   scatter_data <- list() 
   for (i in 1:length(data$tablet_mass)){ 
-    scatter_data <- append(scatter_data,list(c(x = data$tablet_mass[[i]], y=data$percent_val[[i]]))) 
+    scatter_data <- append(scatter_data,list(c(x = data$tablet_mass[[i]], y=data$content_val[[i]]))) 
   } 
 
 
