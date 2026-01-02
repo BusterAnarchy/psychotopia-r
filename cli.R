@@ -25,18 +25,24 @@ load_data <- function(){
                  client.flag = CLIENT_LOCAL_FILES,
                  encoding = "utf8mb4")
   
-  dbListTables(con)
-  data <- dbReadTable(con, "resultats_analyse_cleaned")
+  tables <- dbListTables(con)
+  data <- dbReadTable(con, "psychotopia_analysis")
+
+  if ("psychotopia_analysis_cut_agents" %in% tables) {
+    cut_agents <- dbReadTable(con, "psychotopia_analysis_cut_agents")
+    data <- data %>% left_join(cut_agents, by = "id")
+  }
+
+  if ("psychotopia_analysis_sub_products" %in% tables) {
+    sub_products <- dbReadTable(con, "psychotopia_analysis_sub_products")
+    data <- data %>% left_join(sub_products, by = "id")
+  }
+
+  if ("psychotopia_analysis_tablet_mass" %in% tables) {
+    tablet_mass <- dbReadTable(con, "psychotopia_analysis_tablet_mass")
+    data <- data %>% left_join(tablet_mass, by = "id")
+  }
   dbDisconnect(con)
-  data[] <- lapply(data, function(col) {
-    if (is.character(col)) {
-      col <- gsub("Ã©", "é", col)
-      col <- gsub("Ã¯", "ï", col)
-      return(col)
-    } else {
-      return(col)
-    }
-  })
   data = data %>% mutate(date=as.Date(date))
   
   return(data)
@@ -275,5 +281,4 @@ for (a in parsed_analyses) {
 # --- save the result ---
 
 save_result(results, selected_analyse, args$output, args$format, args$verbose)
-
 
