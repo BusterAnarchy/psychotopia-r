@@ -7,6 +7,13 @@ filter_description <- list(
 )
 
 filter_function <- function(data, args) {
-  form <- strsplit(args$form, ",")[[1]]
-  data %>% filter(forme %in% form)
+  forms <- strsplit(args$form, ",")[[1]]
+  forms <- trimws(tolower(forms))
+  forms <- stringi::stri_trans_general(forms, "Latin-ASCII")
+
+  if ("form" %in% names(data)) {
+    data %>% filter(form %in% forms)
+  } else {
+    stop("Filtre Forme : colonne 'form' absente du jeu de données.")
+  }
 }

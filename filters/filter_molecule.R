@@ -8,5 +8,12 @@ filter_description <- list(
 
 filter_function <- function(data, args) {
     molecule <- args$molecule
-    data %>% filter(molecule_simp == !!molecule)
+    molecule <- trimws(tolower(molecule))
+    molecule <- stringi::stri_trans_general(molecule, "Latin-ASCII")
+
+    if ("molecule" %in% names(data)) {
+      data %>% filter(molecule == !!molecule)
+    } else {
+      stop("Filtre Molécule : colonne 'molecule' absente du jeu de données.")
+    }
 }

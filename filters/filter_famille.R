@@ -8,5 +8,9 @@ filter_description <- list(
 
 filter_function <- function(data, args) {
     molecule_families <- strsplit(args$molecule_families, ",")[[1]]
-    data %>% filter(famille %in% !! molecule_families)
+    if ("family" %in% names(data)) {
+      data %>% filter(family %in% !!molecule_families)
+    } else {
+      stop("Filtre Famille : colonne 'family' absente du jeu de données.")
+    }
 }

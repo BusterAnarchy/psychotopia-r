@@ -7,5 +7,9 @@ filter_description <- list(
 )
 
 filter_function <- function(data, args) {
-    data %>% filter(pourcentage > 0)
+    if ("percent" %in% names(data)) {
+      data %>% filter(percent > 0)
+    } else {
+      stop("Filtre Purity > 0 : colonne 'percent' absente du jeu de données.")
+    }
 }

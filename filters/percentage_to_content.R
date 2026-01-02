@@ -1,13 +1,23 @@
 filter_description <- list(
   name = "Percentage to content",
   args = list(
-    "percentage_to_content" = list(required = FALSE, action = "store_true", help = "Transforme la colonne 'pourcentage' en une colonne de teneurs", alias = "ptc")
+    "percentage_to_content" = list(required = FALSE, action = "store_true", help = "Transforme la colonne 'percent' en une colonne de teneurs", alias = "ptc")
   ),
-  help = "Transforme la colonne 'pourcentage' en une colonne de teneurs"
+  help = "Transforme la colonne 'percent' en une colonne de teneurs"
 )
 
 filter_function <- function(data, args) {
-  molecule <- data$molecule_simp[[1]]
+  if (!("coupe" %in% names(data))) {
+    stop("Percentage to content : colonne 'coupe' absente du jeu de données.")
+  }
+
+  molecule_col <- if ("molecule" %in% names(data)) {
+    "molecule"
+  } else {
+    stop("Percentage to content : colonne 'molecule' absente du jeu de données.")
+  }
+
+  molecule <- data[[molecule_col]][[1]]
 
   data = data %>% filter(grepl("mg", coupe))
 
@@ -36,7 +46,8 @@ filter_function <- function(data, args) {
     return(NA_real_)  # Aucun motif trouvé
   }
 
-  data = data %>% 
-    mutate(pourcentage = sapply(coupe, extract_number_combined)) %>% 
-    filter(!is.na(pourcentage))
+  target_col <- "percent"
+
+  data[[target_col]] <- sapply(data$coupe, extract_number_combined)
+  data <- data[!is.na(data[[target_col]]), ]
 }

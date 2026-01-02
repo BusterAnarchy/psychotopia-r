@@ -7,5 +7,9 @@ filter_description <- list(
 )
 
 filter_function <- function(data, args) {
-    data %>% filter(!is.na(pourcentage))
+    if ("percent" %in% names(data)) {
+      data %>% filter(!is.na(percent))
+    } else {
+      stop("Filtre Pourcentage : colonne 'percent' absente du jeu de données.")
+    }
 }
